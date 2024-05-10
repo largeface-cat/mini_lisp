@@ -1,0 +1,10 @@
+1.为什么 Tokenizer::tokenize 接受的形参类型是 const std::string& 而不是 std::string？可不可以用 std::string&？
+避免不必要的复制：如果参数类型是 std::string，那么会创建一个新的 std::string 对象，涉及到内存分配和字符串内容的复制，是一种性能开销。而如果参数类型是 const std::string&，则只是创建了一个指向原始 std::string 对象的引用，不会发生复制。保护原始数据：const std::string& 表示这是一个对常量的引用，意味着不能通过这个引用来修改原始的 std::string 对象。这是一种保护机制，确保函数不会改变传入的字符串。使用std::string&意味着函数有可能会修改传入的字符串。
+2.为什么使用 TokenPtr，也即 std::unique_ptr<Token>？如果改用 Token*，会有什么影响？
+使得它无法被复制到其他 unique_ptr，无法通过值传递到函数，也无法用于需要副本的任何标准模板库 (STL) 算法，只能被移动。如果改用 Token*，不能保证对象的所有权只属于一个实例，且需要手动释放内存和处理异常。
+3.main 函数中 std::cout << *token 是如何实现的？
+通过重载<<运算符，调用toString方法实现
+4.当词法分析出现错误时，程序是如何进行错误处理的？
+通过try catch语句捕获错误
+5.使用 std::deque<TokenPtr> 相比 std::vector<TokenPtr> 的好处是什么？
+两端插入删除的效率更高，且支持随机访问，可能在后续的任务中使用更方便

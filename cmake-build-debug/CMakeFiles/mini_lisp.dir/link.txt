@@ -1,0 +1,3 @@
+D:\CLion\bin\cmake\win\x64\bin\cmake.exe -E rm -f CMakeFiles\mini_lisp.dir/objects.a
+D:\CLion\bin\mingw\bin\ar.exe qc CMakeFiles\mini_lisp.dir/objects.a @CMakeFiles\mini_lisp.dir\objects1.rsp
+D:\CLion\bin\mingw\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\mini_lisp.dir/objects.a -Wl,--no-whole-archive -o D:\CLion\mini_lisp\bin\mini_lisp.exe -Wl,--out-implib,libmini_lisp.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\mini_lisp.dir\linkLibs.rsp
