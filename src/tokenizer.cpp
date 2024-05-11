@@ -42,6 +42,7 @@ TokenPtr Tokenizer::nextToken(int& pos) {
                     if (next == 'n') {
                         string += '\n';
                     } else {
+                        string += '\\';
                         string += next;
                     }
                     pos += 2;

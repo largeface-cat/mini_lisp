@@ -55,7 +55,7 @@ std::string NumericLiteralToken::toString() const {
 
 std::string StringLiteralToken::toString() const {
     std::ostringstream ss;
-    ss << "(STRING_LITERAL " << std::quoted(value) << ")";
+    ss << "(STRING_LITERAL " << std::string (value) << ")";
     return ss.str();
 }
 
