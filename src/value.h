@@ -2,7 +2,7 @@
 #define VALUE_H
 #include <memory>
 #include <optional>
-
+#include <vector>
 enum class ValueType {
     BooleanValue,
     NumericValue,
@@ -26,7 +26,17 @@ public:
     ValueType getType() const {
         return type;
     }
+    bool isNil() const {
+        return type == ValueType::NilValue;
+    }
+    bool isSelfEvaluating() const {
+        return type == ValueType::NumericValue ||
+               type == ValueType::BooleanValue ||
+               type == ValueType::StringValue;
+    }
     virtual std::string toString() const;
+    virtual std::vector<ValuePtr> toVector() const;
+    virtual std::optional<std::string> asSymbol() const;
     template <typename T>
     T* as() {
         return dynamic_cast<T*>(this);
@@ -38,10 +48,11 @@ private:
     bool value;
 
 public:
-    BooleanValue(bool value)
-        : Value(ValueType::BooleanValue), value{value} {}
+    BooleanValue(bool value) : Value(ValueType::BooleanValue), value{value} {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 class NumericValue : public Value {
@@ -49,10 +60,11 @@ private:
     double value;
 
 public:
-    NumericValue(double value)
-        : Value(ValueType::NumericValue), value{value} {}
+    NumericValue(double value) : Value(ValueType::NumericValue), value{value} {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 class StringValue : public Value {
@@ -64,6 +76,8 @@ public:
         : Value(ValueType::StringValue), value{value} {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 class NilValue : public Value {
@@ -71,6 +85,8 @@ public:
     NilValue() : Value(ValueType::NilValue) {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 class SymbolValue : public Value {
@@ -82,6 +98,8 @@ public:
         : Value(ValueType::SymbolValue), value{value} {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 class PairValue : public Value {
@@ -94,6 +112,8 @@ public:
         : Value(ValueType::PairValue), car{car}, cdr{cdr} {}
 
     std::string toString() const override;
+    std::vector<ValuePtr> toVector() const override;
+    std::optional<std::string> asSymbol() const override;
 };
 
 #endif  // VALUE_H
