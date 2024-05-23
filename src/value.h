@@ -37,6 +37,12 @@ public:
     virtual std::string toString() const;
     virtual std::vector<ValuePtr> toVector() const;
     virtual std::optional<std::string> asSymbol() const;
+    virtual bool isNumber() const {
+        return false;
+    }
+    virtual double asNumber() const {
+        throw std::runtime_error("Not a number");
+    }
     template <typename T>
     T* as() {
         return dynamic_cast<T*>(this);
@@ -52,7 +58,6 @@ public:
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
 };
 
 class NumericValue : public Value {
@@ -64,7 +69,12 @@ public:
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
+    bool isNumber() const override {
+        return true;
+    }
+    double asNumber() const override {
+        return value;
+    }
 };
 
 class StringValue : public Value {
@@ -77,7 +87,6 @@ public:
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
 };
 
 class NilValue : public Value {
@@ -86,7 +95,6 @@ public:
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
 };
 
 class SymbolValue : public Value {
@@ -109,11 +117,21 @@ private:
 
 public:
     PairValue(ValuePtr car, ValuePtr cdr)
-        : Value(ValueType::PairValue), car{car}, cdr{cdr} {}
+        : Value(ValueType::PairValue), car{std::move(car)}, cdr{std::move(cdr)} {}
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
+};
+
+using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
+class BuiltinProcValue : public Value {
+private:
+    BuiltinFuncType* func;
+public:
+    BuiltinProcValue(BuiltinFuncType* func)
+        : Value(ValueType::SymbolValue), func{func} {}
+    std::string toString() const override;
+    ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 
 #endif  // VALUE_H

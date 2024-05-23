@@ -1,8 +1,4 @@
-//
-// Created by 猫猫 on 2024/5/5.
-//
-
-#include "value.h"
+#include "./value.h"
 
 
 std::string Value::toString() const {
@@ -47,6 +43,10 @@ std::string PairValue::toString() const {
     }
     result += ")";
     return result;
+}
+
+std::string BuiltinProcValue::toString() const {
+    return "#<procedure>";
 }
 
 std::vector<ValuePtr> Value::toVector() const {
@@ -96,23 +96,6 @@ std::optional<std::string> SymbolValue::asSymbol() const {
     return value;
 }
 
-
-std::optional<std::string> NilValue::asSymbol() const {
-    return std::nullopt;
-}
-
-std::optional<std::string> PairValue::asSymbol() const {
-    return std::nullopt;
-}
-
-std::optional<std::string> StringValue::asSymbol() const {
-    return std::nullopt;
-}
-
-std::optional<std::string> BooleanValue::asSymbol() const {
-    return std::nullopt;
-}
-
-std::optional<std::string> NumericValue::asSymbol() const {
-    return std::nullopt;
+ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args) {
+    return func(args);
 }
