@@ -54,6 +54,9 @@ ValuePtr Parser::parseTails() {
         return std::make_shared<NilValue>();
     }
     auto car = parse();
+    if (tokens.empty()) {
+        throw std::runtime_error("Unexpected EOF");
+    }
     if (tokens.front()->getType() == TokenType::DOT) {
         tokens.pop_front();
         auto cdr = parse();
@@ -61,6 +64,7 @@ ValuePtr Parser::parseTails() {
             throw std::runtime_error("Expecting ')'");
         }
         tokens.pop_front();
+        cdr = std::make_shared<PairValue>(cdr, std::make_shared<NilValue>());
         return std::make_shared<PairValue>(car, cdr);
     }
     auto cdr = parseTails();
