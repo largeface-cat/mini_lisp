@@ -20,5 +20,6 @@ ValuePtr cons(const std::vector<ValuePtr>& params);
 ValuePtr car(const std::vector<ValuePtr>& params);
 ValuePtr cdr(const std::vector<ValuePtr>& params);
 ValuePtr list(const std::vector<ValuePtr>& params);
+ValuePtr length(const std::vector<ValuePtr>& params);
 
 #endif  // BUILTINS_H

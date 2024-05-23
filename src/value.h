@@ -121,6 +121,12 @@ public:
 
     std::string toString() const override;
     std::vector<ValuePtr> toVector() const override;
+    ValuePtr getCar() const {
+        return car;
+    }
+    ValuePtr getCdr() const {
+        return cdr;
+    }
 };
 
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
