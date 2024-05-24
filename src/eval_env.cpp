@@ -5,14 +5,6 @@ using namespace std::literals;
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     std::vector<ValuePtr> v = expr->toVector();
-//    if (v[0]->asSymbol() == "define"s) {
-//        if (auto name = v[1]->asSymbol()) {
-//            define(*name, eval(v[2]));
-//            return std::make_shared<NilValue>();
-//        } else {
-//            throw LispError("Malformed define.");
-//        }
-//    }
     if (expr->getType() == ValueType::PairValue) {
         auto* pair = expr->as<PairValue>();
         if (auto name = pair->getCar()->asSymbol()) {
@@ -30,12 +22,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         return apply(proc, args);
     }
     if (auto name = expr->asSymbol()) {
-        auto value = env.find(*name);
-        if (value != env.end()) {
-            return value->second;
-        } else {
-            throw LispError("Variable " + *name + " not defined.");
-        }
+        return lookupBinding(*name);
     }
     if (expr->isSelfEvaluating()) {
         return expr;
@@ -65,4 +52,15 @@ ValuePtr EvalEnv::apply(const ValuePtr& proc,
 
 void EvalEnv::define(const std::string& symbol, ValuePtr value) {
     env[symbol] = std::move(value);
+}
+
+ValuePtr EvalEnv::lookupBinding(const std::string& symbol) {
+    auto it = env.find(symbol);
+    if (it != env.end()) {
+        return it->second;
+    }
+    if (parent) {
+        return parent->lookupBinding(symbol);
+    }
+    throw LispError("Variable " + symbol + " not defined.");
 }

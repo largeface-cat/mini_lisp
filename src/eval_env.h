@@ -9,9 +9,7 @@
 class EvalEnv {
 private:
     std::unordered_map<std::string, ValuePtr> env{};
-    static ValuePtr evalSelfEvaluating(ValuePtr expr);
-    static ValuePtr evalSymbol(ValuePtr expr);
-    static ValuePtr evalPair(ValuePtr expr);
+    std::shared_ptr<EvalEnv> parent{};
 public:
     EvalEnv() {
         env = getBuiltins();
@@ -20,5 +18,6 @@ public:
     std::vector<ValuePtr> evalList(const std::vector<ValuePtr>& list);
     ValuePtr apply(const ValuePtr& proc, const std::vector<ValuePtr>& args);
     void define(const std::string& symbol, ValuePtr value);
+    ValuePtr lookupBinding(const std::string& symbol);
 };
 #endif  // EVAL_ENV_H
