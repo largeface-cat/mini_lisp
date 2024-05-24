@@ -1,11 +1,33 @@
 #include "./eval_env.h"
 
-#include <utility>
+//#include <utility>
 
 #include "./forms.h"
 std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {
     struct make_shared_enabler : public EvalEnv {};
-    return std::make_shared<make_shared_enabler>();
+    auto _env = std::make_shared<make_shared_enabler>();
+    _env->setEnv(getBuiltins());
+    return _env;
+}
+
+std::shared_ptr<EvalEnv> EvalEnv::createNew(
+    const std::vector<std::string>& params, const std::vector<ValuePtr>& args) {
+    struct make_shared_enabler : public EvalEnv {};
+    auto _env = std::make_shared<make_shared_enabler>();
+    std::unordered_map<std::string, ValuePtr> env_map;
+    for (size_t i = 0; i < params.size(); i++) {
+        env_map[params[i]] = args[i];
+    }
+    _env->setEnv(env_map);
+    return _env;
+}
+
+void EvalEnv::setParent(std::shared_ptr<EvalEnv>& p) {
+    this->parent = p;
+}
+
+void EvalEnv::setEnv(const std::unordered_map<std::string, ValuePtr>& env_map) {
+    env = env_map;
 }
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
@@ -50,6 +72,8 @@ ValuePtr EvalEnv::apply(const ValuePtr& proc,
                         const std::vector<ValuePtr>& args) {
     if (typeid(*proc) == typeid(BuiltinProcValue)) {
         return proc->as<BuiltinProcValue>()->apply(args);
+    } else if (typeid(*proc) == typeid(LambdaValue)) {
+        return proc->as<LambdaValue>()->apply(args);
     } else {
         throw LispError("Unimplemented");
     }
