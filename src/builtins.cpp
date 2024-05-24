@@ -1,9 +1,11 @@
 #include "./builtins.h"
+#include "./lambda.h"
 
 #include <ranges>
 #include <valarray>
 std::unordered_map<std::string, ValuePtr> getBuiltins() {
     return {
+        {"apply", std::make_shared<BuiltinProcValue>(apply)},
         {"print", std::make_shared<BuiltinProcValue>(print)},
         {"newline", std::make_shared<BuiltinProcValue>(newline)},
         {"display", std::make_shared<BuiltinProcValue>(display)},
@@ -34,27 +36,45 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
     };
 }
 
-ValuePtr print(const std::vector<ValuePtr>& params) {
+ValuePtr apply(BuiltinParams params) {
+    Checker::checkParams(params, 2, 2);
+    auto proc = params[0];
+    auto args = params[1];
+    if (proc->getType() == ValueType::LambdaValue) {
+        return proc->as<LambdaValue>()->apply(args->toVector());
+    }
+    if (proc->getType() == ValueType::BuiltinProcValue) {
+        return proc->as<BuiltinProcValue>()->apply(args->toVector());
+    }
+    std::vector<ValuePtr> arg_list;
+    while (args->getType() == ValueType::PairValue) {
+        arg_list.push_back(args->as<PairValue>()->getCar());
+        args = args->as<PairValue>()->getCdr();
+    }
+    return {};
+}
+
+ValuePtr print(BuiltinParams params) {
     for (const auto& i : params) {
         std::cout << i->toString() << std::endl;
     }
     return std::make_shared<NilValue>();
 }
 
-ValuePtr newline(const std::vector<ValuePtr>& params) {
+ValuePtr newline(BuiltinParams params) {
     Checker::checkParams(params, 0, 0);
     std::cout << std::endl;
     return std::make_shared<NilValue>();
 }
 
-ValuePtr display(const std::vector<ValuePtr>& params) {
+ValuePtr display(BuiltinParams params) {
     for (const auto& i : params) {
         std::cout << i->toString();
     }
     return std::make_shared<NilValue>();
 }
 
-ValuePtr exit_(const std::vector<ValuePtr>& params) {
+ValuePtr exit_(BuiltinParams params) {
     Checker::checkParams(params, 0, 1);
     if (params.size() == 1) {
         Checker::checkNumber(params[0]);
@@ -63,7 +83,7 @@ ValuePtr exit_(const std::vector<ValuePtr>& params) {
     exit(0);
 }
 
-ValuePtr add(const std::vector<ValuePtr>& params) {
+ValuePtr add(BuiltinParams params) {
     double result = 0;
     for (const auto& i : params) {
         Checker::checkNumber(i);
@@ -72,7 +92,7 @@ ValuePtr add(const std::vector<ValuePtr>& params) {
     return std::make_shared<NumericValue>(result);
 }
 
-ValuePtr subtract(const std::vector<ValuePtr>& params) {
+ValuePtr subtract(BuiltinParams params) {
     Checker::checkParams(params, 1, 2);
     Checker::checkNumeric(params);
     if (params.size() == 1) {
@@ -82,7 +102,7 @@ ValuePtr subtract(const std::vector<ValuePtr>& params) {
                                           params[1]->asNumber());
 }
 
-ValuePtr multiply(const std::vector<ValuePtr>& params) {
+ValuePtr multiply(BuiltinParams params) {
     double result = 1;
     Checker::checkNumeric(params);
     for (const auto& i : params) {
@@ -91,7 +111,7 @@ ValuePtr multiply(const std::vector<ValuePtr>& params) {
     return std::make_shared<NumericValue>(result);
 }
 
-ValuePtr divide(const std::vector<ValuePtr>& params) {
+ValuePtr divide(BuiltinParams params) {
     Checker::checkParams(params, 1, 2);
     Checker::checkNumeric(params);
     if (params.size() == 1) {
@@ -107,27 +127,27 @@ ValuePtr divide(const std::vector<ValuePtr>& params) {
                                           params[1]->asNumber());
 }
 
-ValuePtr abs_(const std::vector<ValuePtr>& params) {
+ValuePtr abs_(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
     return std::make_shared<NumericValue>(std::abs(params[0]->asNumber()));
 }
 
-ValuePtr expt(const std::vector<ValuePtr>& params) {
+ValuePtr expt(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<NumericValue>(
         std::pow(params[0]->asNumber(), params[1]->asNumber()));
 }
 
-ValuePtr quotient(const std::vector<ValuePtr>& params) {
+ValuePtr quotient(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<NumericValue>(
         static_cast<int>(params[0]->asNumber() / params[1]->asNumber()));
 }
 
-ValuePtr remainder_(const std::vector<ValuePtr>& params) {
+ValuePtr remainder_(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<NumericValue>(
@@ -135,78 +155,78 @@ ValuePtr remainder_(const std::vector<ValuePtr>& params) {
         static_cast<int>(params[1]->asNumber()));
 }
 
-ValuePtr modulo(const std::vector<ValuePtr>& params) {
+ValuePtr modulo(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<NumericValue>(
         std::fmod(params[0]->asNumber(), params[1]->asNumber()));
 }
 
-ValuePtr eq(const std::vector<ValuePtr>& params) {
+ValuePtr eq(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     return std::make_shared<BooleanValue>(params[0] == params[1]);
 }
 
-ValuePtr lt(const std::vector<ValuePtr>& params) {
+ValuePtr lt(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<BooleanValue>(params[0]->asNumber() <
                                           params[1]->asNumber());
 }
 
-ValuePtr gt(const std::vector<ValuePtr>& params) {
+ValuePtr gt(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<BooleanValue>(params[0]->asNumber() >
                                           params[1]->asNumber());
 }
 
-ValuePtr lte(const std::vector<ValuePtr>& params) {
+ValuePtr lte(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<BooleanValue>(params[0]->asNumber() <=
                                           params[1]->asNumber());
 }
 
-ValuePtr gte(const std::vector<ValuePtr>& params) {
+ValuePtr gte(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
     return std::make_shared<BooleanValue>(params[0]->asNumber() >=
                                           params[1]->asNumber());
 }
 
-ValuePtr even(const std::vector<ValuePtr>& params) {
+ValuePtr even(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
     return std::make_shared<BooleanValue>(
         static_cast<int>(params[0]->asNumber()) % 2 == 0);
 }
 
-ValuePtr odd(const std::vector<ValuePtr>& params) {
+ValuePtr odd(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
     return std::make_shared<BooleanValue>(
         static_cast<int>(params[0]->asNumber()) % 2 != 0);
 }
 
-ValuePtr zero(const std::vector<ValuePtr>& params) {
+ValuePtr zero(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
     return std::make_shared<BooleanValue>(params[0]->asNumber() == 0);
 }
 
-ValuePtr cons(const std::vector<ValuePtr>& params) {
+ValuePtr cons(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     return std::make_shared<PairValue>(params[0], params[1]);
 }
 
-ValuePtr car(const std::vector<ValuePtr>& params) {
+ValuePtr car(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkPairs(params);
     return params[0]->as<PairValue>()->getCar();
 }
 
-ValuePtr cdr(const std::vector<ValuePtr>& params) {
+ValuePtr cdr(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkPairs(params);
     auto cdr_v = params[0]->as<PairValue>()->getCdr();
@@ -216,7 +236,7 @@ ValuePtr cdr(const std::vector<ValuePtr>& params) {
     return params[0]->as<PairValue>()->getCdr();
 }
 
-ValuePtr list(const std::vector<ValuePtr>& params) {
+ValuePtr list(BuiltinParams params) {
     ValuePtr result = std::make_shared<NilValue>();
     for (const auto& param : std::ranges::reverse_view(params)) {
         result = std::make_shared<PairValue>(param, result);
@@ -224,7 +244,7 @@ ValuePtr list(const std::vector<ValuePtr>& params) {
     return result;
 }
 
-ValuePtr length(const std::vector<ValuePtr>& params) {
+ValuePtr length(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkPairs(params);
     int result = 0;
@@ -239,7 +259,7 @@ ValuePtr length(const std::vector<ValuePtr>& params) {
     return std::make_shared<NumericValue>(result);
 }
 
-ValuePtr append(const std::vector<ValuePtr>& params) {
+ValuePtr append(BuiltinParams params) {
     ValuePtr result = std::make_shared<NilValue>();
     for (const auto& param : params) {
         if (param->getType() != ValueType::PairValue) {

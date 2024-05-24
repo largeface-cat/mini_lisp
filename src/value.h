@@ -12,6 +12,8 @@ enum class ValueType {
     NilValue,
     SymbolValue,
     PairValue,
+    BuiltinProcValue,
+    LambdaValue,
 };
 class Value;
 using ValuePtr = std::shared_ptr<Value>;
@@ -151,7 +153,7 @@ private:
 
 public:
     explicit BuiltinProcValue(BuiltinFuncType* func)
-        : Value(ValueType::SymbolValue), func{func} {}
+        : Value(ValueType::BuiltinProcValue), func{func} {}
     [[nodiscard]] std::string toString() const override;
     ValuePtr apply(const std::vector<ValuePtr>& args);
 };

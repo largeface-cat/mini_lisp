@@ -10,7 +10,7 @@ private:
 public:
     LambdaValue(std::vector<std::string> params, std::vector<ValuePtr> body,
                 std::shared_ptr<EvalEnv> env)
-        : Value(ValueType::SymbolValue),
+        : Value(ValueType::LambdaValue),
           params{std::move(params)},
           body{std::move(body)},
           parent_env{std::move(env)} {}
