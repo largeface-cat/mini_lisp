@@ -15,6 +15,7 @@ public:
           body{std::move(body)},
           parent_env{std::move(env)} {}
     [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
     ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 #endif  // LAMBDA_H

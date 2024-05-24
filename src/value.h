@@ -40,6 +40,7 @@ public:
     }
     [[nodiscard]] virtual std::string toString() const;
     [[nodiscard]] virtual std::vector<ValuePtr> toVector() const;
+    [[nodiscard]] virtual bool valueEqual(const Value& other) const;
     [[nodiscard]] virtual std::optional<std::string> asSymbol() const;
     [[nodiscard]] virtual bool isNumber() const {
         return false;
@@ -66,6 +67,7 @@ public:
     [[nodiscard]] bool asBool() const {
         return value;
     }
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 class NumericValue : public Value {
@@ -84,6 +86,7 @@ public:
     [[nodiscard]] double asNumber() const override {
         return value;
     }
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 class StringValue : public Value {
@@ -96,6 +99,7 @@ public:
 
     [[nodiscard]] std::string toString() const override;
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 class NilValue : public Value {
@@ -104,6 +108,7 @@ public:
 
     [[nodiscard]] std::string toString() const override;
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 class SymbolValue : public Value {
@@ -117,6 +122,7 @@ public:
     [[nodiscard]] std::string toString() const override;
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
     [[nodiscard]] std::optional<std::string> asSymbol() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 class PairValue : public Value {
@@ -144,6 +150,7 @@ public:
     void setCdr(ValuePtr value) {
         cdr = std::move(value);
     }
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
 
 using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
@@ -155,6 +162,7 @@ public:
     explicit BuiltinProcValue(BuiltinFuncType* func)
         : Value(ValueType::BuiltinProcValue), func{func} {}
     [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
     ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 

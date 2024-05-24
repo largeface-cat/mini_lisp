@@ -94,6 +94,7 @@ std::optional<std::string> Value::asSymbol() const {
     return std::nullopt;
 }
 
+
 std::optional<std::string> SymbolValue::asSymbol() const {
     return value;
 }
@@ -102,3 +103,58 @@ ValuePtr BuiltinProcValue::apply(const std::vector<ValuePtr>& args) {
     return func(args);
 }
 
+bool Value::valueEqual(const Value& other) const {
+    return this == &other;
+}
+
+bool StringValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::StringValue) {
+        return false;
+    }
+    auto& otherString = dynamic_cast<const StringValue&>(other);
+    return value == otherString.value;
+}
+
+bool BooleanValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::BooleanValue) {
+        return false;
+    }
+    auto& otherBoolean = dynamic_cast<const BooleanValue&>(other);
+    return value == otherBoolean.value;
+}
+
+bool NumericValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::NumericValue) {
+        return false;
+    }
+    auto& otherNumeric = dynamic_cast<const NumericValue&>(other);
+    return value == otherNumeric.value;
+}
+
+bool NilValue::valueEqual(const Value& other) const {
+    return other.getType() == ValueType::NilValue;
+}
+
+bool SymbolValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::SymbolValue) {
+        return false;
+    }
+    auto& otherSymbol = dynamic_cast<const SymbolValue&>(other);
+    return value == otherSymbol.value;
+}
+
+bool PairValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::PairValue) {
+        return false;
+    }
+    auto& otherPair = dynamic_cast<const PairValue&>(other);
+    return car->valueEqual(*otherPair.car) && cdr->valueEqual(*otherPair.cdr);
+}
+
+bool BuiltinProcValue::valueEqual(const Value& other) const {
+    if (other.getType() != ValueType::BuiltinProcValue) {
+        return false;
+    }
+    auto& otherBuiltin = dynamic_cast<const BuiltinProcValue&>(other);
+    return func == otherBuiltin.func;
+}

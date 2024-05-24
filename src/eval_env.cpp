@@ -93,3 +93,5 @@ ValuePtr EvalEnv::lookupBinding(const std::string& symbol) {
     }
     throw LispError("Variable " + symbol + " not defined.");
 }
+
+const std::shared_ptr<EvalEnv> GLOBAL_ENV = EvalEnv::createGlobal();

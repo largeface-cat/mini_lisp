@@ -25,4 +25,6 @@ public:
     void define(const std::string& symbol, ValuePtr value);
     ValuePtr lookupBinding(const std::string& symbol);
 };
+
+extern const std::shared_ptr<EvalEnv> GLOBAL_ENV;
 #endif  // EVAL_ENV_H
