@@ -1,6 +1,4 @@
 #include "./token.h"
-
-#include <iomanip>
 #include <sstream>
 
 using namespace std::literals;
@@ -25,12 +23,12 @@ TokenPtr Token::dot() {
 
 std::string Token::toString() const {
     switch (type) {
-        case TokenType::LEFT_PAREN: return "(LEFT_PAREN)"; break;
-        case TokenType::RIGHT_PAREN: return "(RIGHT_PAREN)"; break;
-        case TokenType::QUOTE: return "(QUOTE)"; break;
-        case TokenType::QUASIQUOTE: return "(QUASIQUOTE)"; break;
-        case TokenType::UNQUOTE: return "(UNQUOTE)"; break;
-        case TokenType::DOT: return "(DOT)"; break;
+        case TokenType::LEFT_PAREN: return "(LEFT_PAREN)";
+        case TokenType::RIGHT_PAREN: return "(RIGHT_PAREN)";
+        case TokenType::QUOTE: return "(QUOTE)";
+        case TokenType::QUASIQUOTE: return "(QUASIQUOTE)";
+        case TokenType::UNQUOTE: return "(UNQUOTE)";
+        case TokenType::DOT: return "(DOT)";
         default: return "(UNKNOWN)";
     }
 }

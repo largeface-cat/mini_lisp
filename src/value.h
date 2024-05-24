@@ -2,6 +2,7 @@
 #define VALUE_H
 #include <memory>
 #include <optional>
+#include <utility>
 #include <vector>
 enum class ValueType {
     BooleanValue,
@@ -18,29 +19,29 @@ private:
     ValueType type;
 
 protected:
-    Value(ValueType type) : type{type} {}
+    explicit Value(ValueType type) : type{type} {}
 
 public:
     virtual ~Value() = default;
 
-    ValueType getType() const {
+    [[nodiscard]] ValueType getType() const {
         return type;
     }
-    bool isNil() const {
+    [[nodiscard]] bool isNil() const {
         return type == ValueType::NilValue;
     }
-    bool isSelfEvaluating() const {
+    [[nodiscard]] bool isSelfEvaluating() const {
         return type == ValueType::NumericValue ||
                type == ValueType::BooleanValue ||
                type == ValueType::StringValue;
     }
-    virtual std::string toString() const;
-    virtual std::vector<ValuePtr> toVector() const;
-    virtual std::optional<std::string> asSymbol() const;
-    virtual bool isNumber() const {
+    [[nodiscard]] virtual std::string toString() const;
+    [[nodiscard]] virtual std::vector<ValuePtr> toVector() const;
+    [[nodiscard]] virtual std::optional<std::string> asSymbol() const;
+    [[nodiscard]] virtual bool isNumber() const {
         return false;
     }
-    virtual double asNumber() const {
+    [[nodiscard]] virtual double asNumber() const {
         throw std::runtime_error("Not a number");
     }
     template <typename T>
@@ -54,10 +55,14 @@ private:
     bool value;
 
 public:
-    BooleanValue(bool value) : Value(ValueType::BooleanValue), value{value} {}
+    explicit BooleanValue(bool value)
+        : Value(ValueType::BooleanValue), value{value} {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] bool asBool() const {
+        return value;
+    }
 };
 
 class NumericValue : public Value {
@@ -65,14 +70,15 @@ private:
     double value;
 
 public:
-    NumericValue(double value) : Value(ValueType::NumericValue), value{value} {}
+    explicit NumericValue(double value)
+        : Value(ValueType::NumericValue), value{value} {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
-    bool isNumber() const override {
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] bool isNumber() const override {
         return true;
     }
-    double asNumber() const override {
+    [[nodiscard]] double asNumber() const override {
         return value;
     }
 };
@@ -82,19 +88,19 @@ private:
     std::string value;
 
 public:
-    StringValue(const std::string& value)
-        : Value(ValueType::StringValue), value{value} {}
+    explicit StringValue(std::string value)
+        : Value(ValueType::StringValue), value{std::move(value)} {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
 };
 
 class NilValue : public Value {
 public:
     NilValue() : Value(ValueType::NilValue) {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
 };
 
 class SymbolValue : public Value {
@@ -102,12 +108,12 @@ private:
     std::string value;
 
 public:
-    SymbolValue(const std::string& value)
-        : Value(ValueType::SymbolValue), value{value} {}
+    explicit SymbolValue(std::string  value)
+        : Value(ValueType::SymbolValue), value{std::move(value)} {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
-    std::optional<std::string> asSymbol() const override;
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] std::optional<std::string> asSymbol() const override;
 };
 
 class PairValue : public Value {
@@ -117,15 +123,23 @@ private:
 
 public:
     PairValue(ValuePtr car, ValuePtr cdr)
-        : Value(ValueType::PairValue), car{std::move(car)}, cdr{std::move(cdr)} {}
+        : Value(ValueType::PairValue),
+          car{std::move(car)},
+          cdr{std::move(cdr)} {}
 
-    std::string toString() const override;
-    std::vector<ValuePtr> toVector() const override;
-    ValuePtr getCar() const {
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] std::vector<ValuePtr> toVector() const override;
+    [[nodiscard]] ValuePtr getCar() const {
         return car;
     }
-    ValuePtr getCdr() const {
+    [[nodiscard]] ValuePtr getCdr() const {
         return cdr;
+    }
+    void setCar(ValuePtr value) {
+        car = std::move(value);
+    }
+    void setCdr(ValuePtr value) {
+        cdr = std::move(value);
     }
 };
 
@@ -133,11 +147,23 @@ using BuiltinFuncType = ValuePtr(const std::vector<ValuePtr>&);
 class BuiltinProcValue : public Value {
 private:
     BuiltinFuncType* func;
+
 public:
-    BuiltinProcValue(BuiltinFuncType* func)
+    explicit BuiltinProcValue(BuiltinFuncType* func)
         : Value(ValueType::SymbolValue), func{func} {}
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
     ValuePtr apply(const std::vector<ValuePtr>& args);
+};
+
+class LambdaValue : public Value {
+private:
+    std::vector<std::string> params;
+    std::vector<ValuePtr> body;
+    // [...]
+public:
+    LambdaValue(std::vector<std::string> params, std::vector<ValuePtr> body)
+        : Value(ValueType::SymbolValue), params{std::move(params)}, body{std::move(body)} {}
+    [[nodiscard]] std::string toString() const override;
 };
 
 #endif  // VALUE_H

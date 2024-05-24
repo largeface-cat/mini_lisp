@@ -5,6 +5,7 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <utility>
 
 enum class TokenType {
     LEFT_PAREN,
@@ -27,7 +28,7 @@ private:
     TokenType type;
 
 protected:
-    Token(TokenType type) : type{type} {}
+    explicit Token(TokenType type) : type{type} {}
 
 public:
     virtual ~Token() = default;
@@ -35,10 +36,10 @@ public:
     static TokenPtr fromChar(char c);
     static TokenPtr dot();
 
-    TokenType getType() const {
+    [[nodiscard]] TokenType getType() const {
         return type;
     }
-    virtual std::string toString() const;
+    [[nodiscard]] virtual std::string toString() const;
 };
 
 class BooleanLiteralToken : public Token {
@@ -46,14 +47,14 @@ private:
     bool value;
 
 public:
-    BooleanLiteralToken(bool value) : Token(TokenType::BOOLEAN_LITERAL), value{value} {}
+    explicit BooleanLiteralToken(bool value) : Token(TokenType::BOOLEAN_LITERAL), value{value} {}
 
     static std::unique_ptr<BooleanLiteralToken> fromChar(char c);
 
-    bool getValue() const {
+    [[nodiscard]] bool getValue() const {
         return value;
     }
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 };
 
 class NumericLiteralToken : public Token {
@@ -61,12 +62,12 @@ private:
     double value;
 
 public:
-    NumericLiteralToken(double value) : Token(TokenType::NUMERIC_LITERAL), value{value} {}
+    explicit NumericLiteralToken(double value) : Token(TokenType::NUMERIC_LITERAL), value{value} {}
 
-    double getValue() const {
+    [[nodiscard]] double getValue() const {
         return value;
     }
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 };
 
 class StringLiteralToken : public Token {
@@ -74,12 +75,12 @@ private:
     std::string value;
 
 public:
-    StringLiteralToken(const std::string& value) : Token(TokenType::STRING_LITERAL), value{value} {}
+    explicit StringLiteralToken(std::string value) : Token(TokenType::STRING_LITERAL), value{std::move(value)} {}
 
-    const std::string& getValue() const {
+    [[nodiscard]] const std::string& getValue() const {
         return value;
     }
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 };
 
 class IdentifierToken : public Token {
@@ -87,12 +88,12 @@ private:
     std::string name;
 
 public:
-    IdentifierToken(const std::string& name) : Token(TokenType::IDENTIFIER), name{name} {}
+    explicit IdentifierToken(std::string name) : Token(TokenType::IDENTIFIER), name{std::move(name)} {}
 
-    const std::string& getName() const {
+    [[nodiscard]] const std::string& getName() const {
         return name;
     }
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
 };
 
 std::ostream& operator<<(std::ostream& os, const Token& token);

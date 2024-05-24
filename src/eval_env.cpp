@@ -1,15 +1,25 @@
-#include "eval_env.h"
-
+#include "./eval_env.h"
+#include "./forms.h"
 #include <utility>
 using namespace std::literals;
+
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     std::vector<ValuePtr> v = expr->toVector();
-    if (v[0]->asSymbol() == "define"s) {
-        if (auto name = v[1]->asSymbol()) {
-            define(*name, eval(v[2]));
-            return std::make_shared<NilValue>();
-        } else {
-            throw LispError("Malformed define.");
+//    if (v[0]->asSymbol() == "define"s) {
+//        if (auto name = v[1]->asSymbol()) {
+//            define(*name, eval(v[2]));
+//            return std::make_shared<NilValue>();
+//        } else {
+//            throw LispError("Malformed define.");
+//        }
+//    }
+    if (expr->getType() == ValueType::PairValue) {
+        auto* pair = expr->as<PairValue>();
+        if (auto name = pair->getCar()->asSymbol()) {
+            if (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end()) {
+                    return SPECIAL_FORMS.at(*name)(
+                    expr->as<PairValue>()->getCdr()->toVector(), *this);;
+            }
         }
     }
     // end of special forms
@@ -35,6 +45,7 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         throw LispError("Unimplemented");
     }
 }
+
 std::vector<ValuePtr> EvalEnv::evalList(const std::vector<ValuePtr>& list) {
     std::vector<ValuePtr> result;
     std::ranges::transform(
@@ -42,13 +53,16 @@ std::vector<ValuePtr> EvalEnv::evalList(const std::vector<ValuePtr>& list) {
         [this](ValuePtr v) { return this->eval(std::move(v)); });
     return result;
 }
-ValuePtr EvalEnv::apply(const ValuePtr& proc, const std::vector<ValuePtr>& args) {
+
+ValuePtr EvalEnv::apply(const ValuePtr& proc,
+                        const std::vector<ValuePtr>& args) {
     if (typeid(*proc) == typeid(BuiltinProcValue)) {
         return proc->as<BuiltinProcValue>()->apply(args);
     } else {
         throw LispError("Unimplemented");
     }
 }
+
 void EvalEnv::define(const std::string& symbol, ValuePtr value) {
     env[symbol] = std::move(value);
 }
