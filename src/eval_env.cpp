@@ -1,7 +1,12 @@
 #include "./eval_env.h"
-#include "./forms.h"
+
 #include <utility>
 
+#include "./forms.h"
+std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {
+    struct make_shared_enabler : public EvalEnv {};
+    return std::make_shared<make_shared_enabler>();
+}
 
 ValuePtr EvalEnv::eval(ValuePtr expr) {
     std::vector<ValuePtr> v = expr->toVector();
@@ -9,8 +14,8 @@ ValuePtr EvalEnv::eval(ValuePtr expr) {
         auto* pair = expr->as<PairValue>();
         if (auto name = pair->getCar()->asSymbol()) {
             if (SPECIAL_FORMS.find(*name) != SPECIAL_FORMS.end()) {
-                    return SPECIAL_FORMS.at(*name)(
-                    expr->as<PairValue>()->getCdr()->toVector(), *this);;
+                return SPECIAL_FORMS.at(*name)(
+                    expr->as<PairValue>()->getCdr()->toVector(), *this);
             }
         }
     }
