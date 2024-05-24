@@ -49,9 +49,7 @@ std::string BuiltinProcValue::toString() const {
     return "#<procedure>";
 }
 
-std::string LambdaValue::toString() const {
-    return "#<procedure>";
-}
+
 
 std::vector<ValuePtr> Value::toVector() const {
     throw std::runtime_error("Not a proper list");

@@ -4,6 +4,7 @@
 #include <optional>
 #include <utility>
 #include <vector>
+
 enum class ValueType {
     BooleanValue,
     NumericValue,
@@ -108,7 +109,7 @@ private:
     std::string value;
 
 public:
-    explicit SymbolValue(std::string  value)
+    explicit SymbolValue(std::string value)
         : Value(ValueType::SymbolValue), value{std::move(value)} {}
 
     [[nodiscard]] std::string toString() const override;
@@ -155,15 +156,6 @@ public:
     ValuePtr apply(const std::vector<ValuePtr>& args);
 };
 
-class LambdaValue : public Value {
-private:
-    std::vector<std::string> params;
-    std::vector<ValuePtr> body;
-    // [...]
-public:
-    LambdaValue(std::vector<std::string> params, std::vector<ValuePtr> body)
-        : Value(ValueType::SymbolValue), params{std::move(params)}, body{std::move(body)} {}
-    [[nodiscard]] std::string toString() const override;
-};
+
 
 #endif  // VALUE_H

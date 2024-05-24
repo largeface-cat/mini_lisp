@@ -6,14 +6,16 @@
 #include "./value.h"
 #include "./error.h"
 #include "./builtins.h"
-class EvalEnv {
+class EvalEnv : public std::enable_shared_from_this<EvalEnv>{
 private:
     std::unordered_map<std::string, ValuePtr> env{};
     std::shared_ptr<EvalEnv> parent{};
+
 public:
     EvalEnv() {
         env = getBuiltins();
     };
+    static std::shared_ptr<EvalEnv> createGlobal();
     ValuePtr eval(ValuePtr expr);
     std::vector<ValuePtr> evalList(const std::vector<ValuePtr>& list);
     ValuePtr apply(const ValuePtr& proc, const std::vector<ValuePtr>& args);

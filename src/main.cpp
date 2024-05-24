@@ -5,7 +5,8 @@
 #include "eval_env.h"
 using namespace std::literals;
 //int main() {
-//    EvalEnv env;
+//    auto env = std::make_shared<EvalEnv>();
+//    auto x = env->shared_from_this();
 //    while (true) {
 //        try {
 //            std::cout << ">>> ";
@@ -20,7 +21,7 @@ using namespace std::literals;
 //            auto tokens = Tokenizer::tokenize(line);
 //            Parser parser(std::move(tokens));
 //            auto value = parser.parse();
-//            auto result = env.eval(std::move(value));
+//            auto result = env->eval(std::move(value));
 //            std::cout << result->toString() << std::endl;
 //            for (auto& token : tokens) {
 //                std::cout << *token << std::endl;
@@ -33,12 +34,13 @@ using namespace std::literals;
 
 #include "rjsj_test.hpp"
 struct TestCtx {
-    EvalEnv env;
-    std::string eval(std::string input) {
+    std::shared_ptr<EvalEnv> env = std::make_shared<EvalEnv>();
+    EvalEnv x = *env->shared_from_this();
+        std::string eval(const std::string& input) {
         auto tokens = Tokenizer::tokenize(input);
         Parser parser(std::move(tokens));
         auto value = parser.parse();
-        auto result = env.eval(std::move(value));
+        auto result = env->eval(std::move(value));
         return result->toString();
     }
 };
