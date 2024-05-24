@@ -1,3 +1,0 @@
-D:/CLion/mini_lisp/cmake-build-debug/CMakeFiles/mini_lisp.dir
-D:/CLion/mini_lisp/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/CLion/mini_lisp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
