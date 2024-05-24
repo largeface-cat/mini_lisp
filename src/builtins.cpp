@@ -33,6 +33,7 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
         {"append", std::make_shared<BuiltinProcValue>(append)},
     };
 }
+
 ValuePtr print(const std::vector<ValuePtr>& params) {
     for (const auto& i : params) {
         std::cout << i->toString() << std::endl;
@@ -212,8 +213,7 @@ ValuePtr cdr(const std::vector<ValuePtr>& params) {
     if (cdr_v->getType() == ValueType::NilValue) {
         return std::make_shared<NilValue>();
     }
-    return params[0]->as<PairValue>()->getCdr()
-            ->as<PairValue>()->getCar();
+    return params[0]->as<PairValue>()->getCdr();
 }
 
 ValuePtr list(const std::vector<ValuePtr>& params) {
@@ -266,6 +266,5 @@ ValuePtr append(const std::vector<ValuePtr>& params) {
         current = next;
     }
     result = prev;
-
     return result;
 }
