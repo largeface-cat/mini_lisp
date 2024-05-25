@@ -11,6 +11,8 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
         {"print", std::make_shared<BuiltinProcValue>(print)},
         {"newline", std::make_shared<BuiltinProcValue>(newline)},
         {"display", std::make_shared<BuiltinProcValue>(display)},
+        {"displayln", std::make_shared<BuiltinProcValue>(display_ln)},
+        {"error", std::make_shared<BuiltinProcValue>(error)},
         {"exit", std::make_shared<BuiltinProcValue>(exit_)},
         {"atom?", std::make_shared<BuiltinProcValue>(is_atom)},
         {"boolean?", std::make_shared<BuiltinProcValue>(is_boolean)},
@@ -33,6 +35,8 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
         {"modulo", std::make_shared<BuiltinProcValue>(modulo)},
         {"eq?", std::make_shared<BuiltinProcValue>(eq)},
         {"equal?", std::make_shared<BuiltinProcValue>(equal)},
+        {"eq_sym?", std::make_shared<BuiltinProcValue>(eq)},
+        {"not", std::make_shared<BuiltinProcValue>(not_)},
         {"=", std::make_shared<BuiltinProcValue>(eq)},
         {"<", std::make_shared<BuiltinProcValue>(lt)},
         {">", std::make_shared<BuiltinProcValue>(gt)},
@@ -93,6 +97,19 @@ ValuePtr display(BuiltinParams params) {
     return std::make_shared<NilValue>();
 }
 
+ValuePtr display_ln(BuiltinParams params) {
+    display(params);
+    return newline({});
+}
+
+ValuePtr error(BuiltinParams params) {
+    Checker::checkParams(params, 0, 1);
+    if (params.empty()) {
+        throw LispError({});
+    }
+    throw LispError(params[0]->toString());
+}
+
 ValuePtr exit_(BuiltinParams params) {
     Checker::checkParams(params, 0, 1);
     if (params.size() == 1) {
@@ -104,35 +121,29 @@ ValuePtr exit_(BuiltinParams params) {
 
 ValuePtr is_atom(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList(
-               {ValueType::BooleanValue, ValueType::NumericValue,
-                ValueType::SymbolValue, ValueType::StringValue,
-                ValueType::NilValue},
-               params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(Checker::checkTypeInList(
+        {ValueType::BooleanValue, ValueType::NumericValue,
+         ValueType::SymbolValue, ValueType::StringValue, ValueType::NilValue},
+        params[0]->getType()));
 }
 
 ValuePtr is_boolean(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return params[0]->getType() == ValueType::BooleanValue
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->getType() ==
+                                          ValueType::BooleanValue);
 }
 
 ValuePtr is_number(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return params[0]->getType() == ValueType::NumericValue
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->getType() ==
+                                          ValueType::NumericValue);
 }
 
 ValuePtr is_integer(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return ((params[0]->getType() == ValueType::NumericValue) &&
-            (params[0]->asNumber() == static_cast<int>(params[0]->asNumber())))
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(
+        (params[0]->getType() == ValueType::NumericValue) &&
+        (params[0]->asNumber() == static_cast<int>(params[0]->asNumber())));
 }
 
 ValuePtr is_list(BuiltinParams params) {
@@ -140,9 +151,7 @@ ValuePtr is_list(BuiltinParams params) {
     if (params[0]->getType() == ValueType::NilValue) {
         return std::make_shared<BooleanValue>(true);
     }
-    if (!Checker::checkTypeInList(
-                {ValueType::PairValue},
-                params[0]->getType())) {
+    if (params[0]->getType() != ValueType::PairValue) {
         return std::make_shared<BooleanValue>(false);
     }
     auto tmp = params[0]->as<PairValue>()->getCdr();
@@ -157,43 +166,32 @@ ValuePtr is_list(BuiltinParams params) {
 
 ValuePtr is_null(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList({ValueType::NilValue},
-                                    params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->isNil());
 }
 
 ValuePtr is_pair(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList({ValueType::PairValue},
-                                    params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->getType() ==
+                                          ValueType::PairValue);
 }
 
 ValuePtr is_procedure(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList({ValueType::LambdaValue,
-                                    ValueType::BuiltinProcValue},
-                                    params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(Checker::checkTypeInList(
+        {ValueType::BuiltinProcValue, ValueType::LambdaValue},
+        params[0]->getType()));
 }
 
 ValuePtr is_string(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList({ValueType::StringValue},
-                                    params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->getType() ==
+                                          ValueType::StringValue);
 }
 
 ValuePtr is_symbol(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    return Checker::checkTypeInList({ValueType::SymbolValue},
-                                    params[0]->getType())
-               ? std::make_shared<BooleanValue>(true)
-               : std::make_shared<BooleanValue>(false);
+    return std::make_shared<BooleanValue>(params[0]->getType() ==
+                                          ValueType::SymbolValue);
 }
 
 ValuePtr add(BuiltinParams params) {
@@ -271,8 +269,17 @@ ValuePtr remainder_(BuiltinParams params) {
 ValuePtr modulo(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     Checker::checkNumeric(params);
-    return std::make_shared<NumericValue>(
+    if (params[1]->asNumber() == 0) {
+        throw LispError("Division by zero.");
+    }
+    auto naive_result = std::make_shared<NumericValue>(
         std::fmod(params[0]->asNumber(), params[1]->asNumber()));
+    if (params[0]->asNumber() * params[1]->asNumber() < 0) {
+        return modulo({multiply({std::make_shared<NumericValue>(-1),
+                                 add({params[0], naive_result})}),
+                       params[1]});
+    }
+    return naive_result;
 }
 
 ValuePtr eq(BuiltinParams params) {
@@ -280,12 +287,11 @@ ValuePtr eq(BuiltinParams params) {
     if (params[0]->getType() != params[1]->getType()) {
         return std::make_shared<BooleanValue>(false);
     }
-    if (params[0]->getType() == ValueType::BooleanValue ||
-        params[0]->getType() == ValueType::NumericValue ||
-        params[0]->getType() == ValueType::SymbolValue ||
-        params[0]->getType() == ValueType::NilValue ||
-        params[0]->getType() == ValueType::BuiltinProcValue ||
-        params[0]->getType() == ValueType::LambdaValue) {
+    if (Checker::checkTypeInList(
+            {ValueType::BooleanValue, ValueType::NumericValue,
+             ValueType::SymbolValue, ValueType::NilValue,
+             ValueType::BuiltinProcValue, ValueType::LambdaValue},
+            params[0]->getType())) {
         return equal(params);
     }
     return std::make_shared<BooleanValue>(params[0] == params[1]);
@@ -294,6 +300,12 @@ ValuePtr eq(BuiltinParams params) {
 ValuePtr equal(BuiltinParams params) {
     Checker::checkParams(params, 2, 2);
     return std::make_shared<BooleanValue>(params[0]->valueEqual(*params[1]));
+}
+
+ValuePtr not_(BuiltinParams params) {
+    Checker::checkParams(params, 1, 1);
+    return std::make_shared<BooleanValue>(
+        params[0]->valueEqual(BooleanValue(false)));
 }
 
 ValuePtr lt(BuiltinParams params) {
@@ -375,8 +387,11 @@ ValuePtr list(BuiltinParams params) {
 
 ValuePtr length(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
-    Checker::checkPairs(params);
     int result = 0;
+    if (params[0]->getType() == ValueType::NilValue) {
+        return std::make_shared<NumericValue>(result);
+    }
+    Checker::checkPairs(params);
     ValuePtr current = params[0];
     while (current->getType() == ValueType::PairValue) {
         result++;
@@ -391,7 +406,8 @@ ValuePtr length(BuiltinParams params) {
 ValuePtr append(BuiltinParams params) {
     ValuePtr result = std::make_shared<NilValue>();
     for (const auto& param : params) {
-        if (param->getType() != ValueType::PairValue) {
+        if (param->getType() != ValueType::PairValue &&
+            param->getType() != ValueType::NilValue) {
             throw LispError("Append requires a list.");
         }
         ValuePtr current = param;

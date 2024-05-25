@@ -1,4 +1,5 @@
 #include "lambda.h"
+
 std::string LambdaValue::toString() const {
     return "#<procedure>";
 }

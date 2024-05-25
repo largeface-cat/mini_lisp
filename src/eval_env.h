@@ -4,7 +4,6 @@
 #include <unordered_map>
 
 #include "./builtins.h"
-//#include "./error.h"
 #include "./value.h"
 class EvalEnv : public std::enable_shared_from_this<EvalEnv> {
 private:

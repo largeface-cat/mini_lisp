@@ -55,6 +55,8 @@ ValuePtr eval(BuiltinParams params);
 ValuePtr print(BuiltinParams params);
 ValuePtr newline(BuiltinParams params);
 ValuePtr display(BuiltinParams params);
+ValuePtr display_ln(BuiltinParams params);
+ValuePtr error(BuiltinParams params);
 ValuePtr exit_(BuiltinParams params);
 
 ValuePtr is_atom(BuiltinParams params);
@@ -79,6 +81,7 @@ ValuePtr remainder_(BuiltinParams params);
 ValuePtr modulo(BuiltinParams params);
 ValuePtr eq(BuiltinParams params);
 ValuePtr equal(BuiltinParams params);
+ValuePtr not_(BuiltinParams params);
 ValuePtr lt(BuiltinParams params);
 ValuePtr gt(BuiltinParams params);
 ValuePtr lte(BuiltinParams params);
