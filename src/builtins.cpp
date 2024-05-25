@@ -445,10 +445,16 @@ ValuePtr map(BuiltinParams params) {
         for (auto& arg : args) {
             result.push_back(params[0]->as<LambdaValue>()->apply({arg}));
         }
+        if (result.empty()) {
+            return std::make_shared<NilValue>();
+        }
         return std::make_shared<PairValue>(result);
     } else if (params[0]->getType() == ValueType::BuiltinProcValue) {
         for (auto& arg : args) {
             result.push_back(params[0]->as<BuiltinProcValue>()->apply({arg}));
+        }
+        if (result.empty()) {
+            return std::make_shared<NilValue>();
         }
         return std::make_shared<PairValue>(result);
     } else {
@@ -469,6 +475,9 @@ ValuePtr filter(BuiltinParams params) {
                 result.push_back(arg);
             }
         }
+        if (result.empty()) {
+            return std::make_shared<NilValue>();
+        }
         return std::make_shared<PairValue>(result);
     } else if (params[0]->getType() == ValueType::BuiltinProcValue) {
         for (auto& arg : args) {
@@ -478,6 +487,9 @@ ValuePtr filter(BuiltinParams params) {
                 res->as<BooleanValue>()->asBool()) {
                 result.push_back(arg);
             }
+        }
+        if (result.empty()) {
+            return std::make_shared<NilValue>();
         }
         return std::make_shared<PairValue>(result);
     } else {

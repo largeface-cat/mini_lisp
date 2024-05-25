@@ -145,6 +145,7 @@ public:
             throw std::runtime_error("Empty list");
         }
         car = values[0];
+        cdr = std::make_shared<NilValue>();
         ValuePtr current = nullptr;
         for (size_t i = 1; i < values.size(); i++) {
             if (current == nullptr) {

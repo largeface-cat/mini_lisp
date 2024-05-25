@@ -1,5 +1,5 @@
 // PKU Software Design (RJSJ) Mini-Lisp Test Library
-// Copyright (C) 2023 @pku-software at GitHub.com
+// Copyright (C) 2023-2024 @pku-software at GitHub.com
 
 // To use this library, follow the instructions below:
 // https://pku-software.github.io/project-doc/appendix/rjsj_test.html
@@ -8,8 +8,9 @@
 #ifndef RJSJ_MINI_LISP_TEST_H
 #define RJSJ_MINI_LISP_TEST_H
 
-// Comment below line if you want to manually control do testing or not.
+#ifndef RJSJ_TEST_ENABLED
 #define RJSJ_TEST_ENABLED 1
+#endif
 
 #include <cmath>
 #if __has_include(<concepts>)
@@ -613,7 +614,7 @@ RMLT_END_CASES()
 RMLT_BEGIN_CASES(Lv2Only)
 RMLT_CASE("map", "map")
 RMLT_CASE("+", "+")
-RMLT_CASE("eq_sym?", "eq_sym?")
+RMLT_CASE("eq?", "eq?")
 RMLT_CASE("(a . (b . c))", "(a b . c)")
 RMLT_CASE("(a b c)", "(a b c)")
 RMLT_CASE("(a b . c)", "(a b . c)")
@@ -855,18 +856,18 @@ RMLT_CASE("(remainder 10 3)", "1")
 RMLT_CASE("(remainder -10 3)", "-1")
 RMLT_CASE("(remainder 10 -3)", "1")
 RMLT_CASE("(remainder -10 -3)", "-1")
-RMLT_CASE("(eq_sym? '(1 2 3) '(1 2 3))", "#f")
+RMLT_CASE("(eq? '(1 2 3) '(1 2 3))", "#f")
 RMLT_CASE("(define x '(1 2 3))")
-RMLT_CASE("(eq_sym? x x)", "#t")
+RMLT_CASE("(eq? x x)", "#t")
 RMLT_CASE("(define y x)")
-RMLT_CASE("(eq_sym? x y)", "#t")
+RMLT_CASE("(eq? x y)", "#t")
 RMLT_CASE("(define z '(1 2 3))")
-RMLT_CASE("(eq_sym? x z)", "#f")
-RMLT_CASE("(eq_sym? '() '())", "#t")
-RMLT_CASE("(eq_sym? '() 'a)", "#f")
-RMLT_CASE("(eq_sym? 'a 'a)", "#t")
-RMLT_CASE("(eq_sym? 'a 'b)", "#f")
-RMLT_CASE("(eq_sym? 1 1)", "#t")
+RMLT_CASE("(eq? x z)", "#f")
+RMLT_CASE("(eq? '() '())", "#t")
+RMLT_CASE("(eq? '() 'a)", "#f")
+RMLT_CASE("(eq? 'a 'a)", "#t")
+RMLT_CASE("(eq? 'a 'b)", "#f")
+RMLT_CASE("(eq? 1 1)", "#t")
 RMLT_CASE("(equal? '(1 2 3) '(1 2 3))", "#t")
 RMLT_CASE("(equal? '(1 2 3) '(1 2 4))", "#f")
 RMLT_CASE("(equal? '(1 2 3) '(1 2))", "#f")
@@ -1124,7 +1125,7 @@ RMLT_CASE("((lambda (x) (display x) (newline) x) 2)", "2")
 RMLT_CASE("(let ((x 2)) ((begin (if #t #f) +) 3 (begin x)))", "5")
 // RMLT_CASE("(let ((x 2)) ((begin (define x (+ x 1)) +) 3 (begin (define x (+ x 1)) x)))", "7")
 // Scheme Implementations
-RMLT_CASE("(define (len s) (if (eq_sym? s '()) 0 (+ 1 (len (cdr s)))))")
+RMLT_CASE("(define (len s) (if (eq? s '()) 0 (+ 1 (len (cdr s)))))")
 RMLT_CASE("(len '(1 2 3 4))", "4")
 RMLT_END_CASES()
 
