@@ -95,5 +95,8 @@ ValuePtr cdr(BuiltinParams params);
 ValuePtr list(BuiltinParams params);
 ValuePtr length(BuiltinParams params);
 ValuePtr append(BuiltinParams params);
+ValuePtr map(BuiltinParams params);
+ValuePtr filter(BuiltinParams params);
+ValuePtr reduce(BuiltinParams params);
 
 #endif  // BUILTINS_H

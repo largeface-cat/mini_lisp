@@ -51,6 +51,9 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
         {"list", std::make_shared<BuiltinProcValue>(list)},
         {"length", std::make_shared<BuiltinProcValue>(length)},
         {"append", std::make_shared<BuiltinProcValue>(append)},
+        {"map", std::make_shared<BuiltinProcValue>(map)},
+        {"filter", std::make_shared<BuiltinProcValue>(filter)},
+        {"reduce", std::make_shared<BuiltinProcValue>(reduce)},
     };
 }
 
@@ -432,4 +435,73 @@ ValuePtr append(BuiltinParams params) {
     }
     result = prev;
     return result;
+}
+
+ValuePtr map(BuiltinParams params) {
+    Checker::checkParams(params, 2, 2);
+    auto result = std::vector<ValuePtr>();
+    auto args = params[1]->toVector();
+    if (params[0]->getType() == ValueType::LambdaValue) {
+        for (auto& arg : args) {
+            result.push_back(params[0]->as<LambdaValue>()->apply({arg}));
+        }
+        return std::make_shared<PairValue>(result);
+    } else if (params[0]->getType() == ValueType::BuiltinProcValue) {
+        for (auto& arg : args) {
+            result.push_back(params[0]->as<BuiltinProcValue>()->apply({arg}));
+        }
+        return std::make_shared<PairValue>(result);
+    } else {
+        throw LispError("Map requires a procedure.");
+    }
+}
+
+ValuePtr filter(BuiltinParams params) {
+    Checker::checkParams(params, 2, 2);
+    auto result = std::vector<ValuePtr>();
+    auto args = params[1]->toVector();
+    if (params[0]->getType() == ValueType::LambdaValue) {
+        for (auto& arg : args) {
+            auto res = params[0]->as<LambdaValue>()->apply({arg});
+            if (res->getType() !=
+                    ValueType::BooleanValue ||
+                res->as<BooleanValue>()->asBool()) {
+                result.push_back(arg);
+            }
+        }
+        return std::make_shared<PairValue>(result);
+    } else if (params[0]->getType() == ValueType::BuiltinProcValue) {
+        for (auto& arg : args) {
+            auto res = params[0]->as<BuiltinProcValue>()->apply({arg});
+            if (res->getType() !=
+                    ValueType::BooleanValue ||
+                res->as<BooleanValue>()->asBool()) {
+                result.push_back(arg);
+            }
+        }
+        return std::make_shared<PairValue>(result);
+    } else {
+        throw LispError("Filter requires a procedure.");
+    }
+}
+
+ValuePtr reduce(BuiltinParams params) {
+    Checker::checkParams(params, 2, 2);
+    if (params[1]->getType() != ValueType::PairValue) {
+        throw LispError("Reduce requires a list.");
+    }
+    if (length({params[1]})->asNumber() == 1) {
+        return car({params[1]});
+    }
+    if (params[0]->getType() == ValueType::LambdaValue) {
+        auto arg1 = car({params[1]});
+        auto arg2 = reduce({params[0], cdr({params[1]})});
+        return params[0]->as<LambdaValue>()->apply({arg1, arg2});
+    } else if (params[0]->getType() == ValueType::BuiltinProcValue) {
+        auto arg1 = car({params[1]});
+        auto arg2 = reduce({params[0], cdr({params[1]})});
+        return params[0]->as<BuiltinProcValue>()->apply({arg1, arg2});
+    } else {
+        throw LispError("Reduce requires a procedure.");
+    }
 }

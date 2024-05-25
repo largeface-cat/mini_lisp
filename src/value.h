@@ -48,6 +48,9 @@ public:
     [[nodiscard]] virtual double asNumber() const {
         throw std::runtime_error("Not a number");
     }
+    virtual ValuePtr apply(const std::vector<ValuePtr>& args) {
+        throw std::runtime_error("Not a procedure");
+    }
     template <typename T>
     T* as() {
         return dynamic_cast<T*>(this);
@@ -136,6 +139,26 @@ public:
           car{std::move(car)},
           cdr{std::move(cdr)} {}
 
+    explicit PairValue(std::vector<ValuePtr> values)
+        : Value(ValueType::PairValue) {
+        if (values.empty()) {
+            throw std::runtime_error("Empty list");
+        }
+        car = values[0];
+        ValuePtr current = nullptr;
+        for (size_t i = 1; i < values.size(); i++) {
+            if (current == nullptr) {
+                current = std::make_shared<PairValue>(
+                    values[i], std::make_shared<NilValue>());
+                cdr = current;
+            } else {
+                current->as<PairValue>()->cdr = std::make_shared<PairValue>(
+                    values[i], std::make_shared<NilValue>());
+                current = current->as<PairValue>()->cdr;
+            }
+        }
+    }
+
     [[nodiscard]] std::string toString() const override;
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
     [[nodiscard]] ValuePtr getCar() const {
@@ -163,9 +186,7 @@ public:
         : Value(ValueType::BuiltinProcValue), func{func} {}
     [[nodiscard]] std::string toString() const override;
     [[nodiscard]] bool valueEqual(const Value& other) const override;
-    ValuePtr apply(const std::vector<ValuePtr>& args);
+    ValuePtr apply(const std::vector<ValuePtr>& args) override;
 };
-
-
 
 #endif  // VALUE_H
