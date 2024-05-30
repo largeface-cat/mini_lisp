@@ -1,7 +1,4 @@
 #include "./eval_env.h"
-
-//#include <utility>
-
 #include "./forms.h"
 std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {
     struct make_shared_enabler : public EvalEnv {};

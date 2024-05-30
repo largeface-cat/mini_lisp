@@ -1,6 +1,8 @@
 #ifndef FORMS_H
 #define FORMS_H
-#include "./lambda.h"
+#include "./value.h"
+#include <unordered_map>
+#include "./eval_env.h"
 
 using SpecialFormType = ValuePtr(const std::vector<ValuePtr>&, EvalEnv&);
 extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS;

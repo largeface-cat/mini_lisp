@@ -7,7 +7,6 @@
 
 #include "./error.h"
 #include "./value.h"
-// #include "./lambda.h"
 class Checker {
 public:
     static void checkParams(const std::vector<ValuePtr>& params, size_t min,

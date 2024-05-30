@@ -189,5 +189,22 @@ public:
     [[nodiscard]] bool valueEqual(const Value& other) const override;
     ValuePtr apply(const std::vector<ValuePtr>& args) override;
 };
+class EvalEnv;
+class LambdaValue : public Value {
+private:
+    std::vector<std::string> params;
+    std::vector<ValuePtr> body;
+    std::shared_ptr<EvalEnv> parent_env;
 
+public:
+    LambdaValue(std::vector<std::string> params, std::vector<ValuePtr> body,
+                std::shared_ptr<EvalEnv> env)
+        : Value(ValueType::LambdaValue),
+          params{std::move(params)},
+          body{std::move(body)},
+          parent_env{std::move(env)} {}
+    [[nodiscard]] std::string toString() const override;
+    [[nodiscard]] bool valueEqual(const Value& other) const override;
+    ValuePtr apply(const std::vector<ValuePtr>& args) override;
+};
 #endif  // VALUE_H

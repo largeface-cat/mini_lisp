@@ -3,7 +3,7 @@
 #include <ranges>
 #include <valarray>
 
-#include "./lambda.h"
+#include "./eval_env.h"
 std::unordered_map<std::string, ValuePtr> getBuiltins() {
     return {
         {"apply", std::make_shared<BuiltinProcValue>(apply)},
