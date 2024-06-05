@@ -95,6 +95,10 @@ ValuePtr newline(BuiltinParams params) {
 
 ValuePtr display(BuiltinParams params) {
     for (const auto& i : params) {
+        if (i->getType() == ValueType::StringValue) {
+            std::cout << i->as<StringValue>()->getValue();
+            continue;
+        }
         std::cout << i->toString();
     }
     return std::make_shared<NilValue>();

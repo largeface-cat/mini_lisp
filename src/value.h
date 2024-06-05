@@ -101,6 +101,9 @@ public:
         : Value(ValueType::StringValue), value{std::move(value)} {}
 
     [[nodiscard]] std::string toString() const override;
+    std::string getValue() const {
+        return value;
+    }
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
     [[nodiscard]] bool valueEqual(const Value& other) const override;
 };
@@ -189,6 +192,7 @@ public:
     [[nodiscard]] bool valueEqual(const Value& other) const override;
     ValuePtr apply(const std::vector<ValuePtr>& args) override;
 };
+
 class EvalEnv;
 class LambdaValue : public Value {
 private:
