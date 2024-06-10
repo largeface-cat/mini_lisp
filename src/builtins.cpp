@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 #include "./builtins.h"
 
 #include <ranges>
@@ -521,3 +523,4 @@ ValuePtr reduce(BuiltinParams params) {
         throw LispError("Reduce requires a procedure.");
     }
 }
+#pragma clang diagnostic pop

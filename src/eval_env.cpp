@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 #include "./eval_env.h"
 #include "./forms.h"
 std::shared_ptr<EvalEnv> EvalEnv::createGlobal() {

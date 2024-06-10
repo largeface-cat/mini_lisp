@@ -1,3 +1,5 @@
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 #include "parser.h"
 ValuePtr Parser::parse() {
     auto token = std::move(tokens.front());
@@ -40,8 +42,6 @@ ValuePtr Parser::parse() {
         );
     }
     throw std::runtime_error("Unexpected token: " + token->toString());
-
-    // [...]
 }
 
 ValuePtr Parser::parseTails() {
@@ -64,7 +64,6 @@ ValuePtr Parser::parseTails() {
             throw std::runtime_error("Expecting ')'");
         }
         tokens.pop_front();
-//        cdr = std::make_shared<PairValue>(cdr, std::make_shared<NilValue>());
         return std::make_shared<PairValue>(car, cdr);
     }
     auto cdr = parseTails();

@@ -101,7 +101,7 @@ public:
         : Value(ValueType::StringValue), value{std::move(value)} {}
 
     [[nodiscard]] std::string toString() const override;
-    std::string getValue() const {
+    [[nodiscard]] std::string getValue() const {
         return value;
     }
     [[nodiscard]] std::vector<ValuePtr> toVector() const override;
