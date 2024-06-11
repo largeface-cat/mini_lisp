@@ -8,6 +8,9 @@ extern const std::unordered_map<std::string, SpecialFormType*> SPECIAL_FORMS{
 };
 
 ValuePtr defineForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() < 2) {
+        throw LispError("Malformed define.");
+    }
     if (auto name = args[0]->asSymbol()) {
         env.define(*name, env.eval(args[1]));
     } else if (args[0]->getType() == ValueType::PairValue) {

@@ -2,6 +2,9 @@
 #pragma ide diagnostic ignored "misc-no-recursion"
 #include "parser.h"
 ValuePtr Parser::parse() {
+    if (tokens.empty()) {
+        throw std::runtime_error("Unexpected EOF");
+    }
     auto token = std::move(tokens.front());
     tokens.pop_front();
     if (token->getType() == TokenType::NUMERIC_LITERAL) {
