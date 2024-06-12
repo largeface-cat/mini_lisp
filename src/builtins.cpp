@@ -348,6 +348,9 @@ ValuePtr gte(BuiltinParams params) {
 ValuePtr even(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
+    if (params[0]->asNumber() != int (params[0]->asNumber())) {
+        throw LispError("Even requires an integer.");
+    }
     return std::make_shared<BooleanValue>(
         static_cast<int>(params[0]->asNumber()) % 2 == 0);
 }
@@ -355,6 +358,9 @@ ValuePtr even(BuiltinParams params) {
 ValuePtr odd(BuiltinParams params) {
     Checker::checkParams(params, 1, 1);
     Checker::checkNumber(params[0]);
+    if (params[0]->asNumber() != int (params[0]->asNumber())) {
+        throw LispError("Odd requires an integer.");
+    }
     return std::make_shared<BooleanValue>(
         static_cast<int>(params[0]->asNumber()) % 2 != 0);
 }

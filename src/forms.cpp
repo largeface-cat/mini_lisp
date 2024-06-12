@@ -151,6 +151,9 @@ ValuePtr beginForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
 }
 
 ValuePtr letForm(const std::vector<ValuePtr>& args, EvalEnv& env) {
+    if (args.size() < 2) {
+        throw LispError("Malformed let.");
+    }
     auto lambda_params = std::vector<std::string>{};
     auto lambda_body = std::vector<ValuePtr>{};
     auto let_args = std::vector<ValuePtr>{};
