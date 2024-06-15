@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     auto env = EvalEnv::createGlobal();
     while (true) {
         try {
-            if (!fileIO >> 1 || !fileIO % 2) std::cout << ">>> ";
+            if (!(fileIO >> 1) || !(fileIO % 2)) std::cout << ">>> ";
             std::string line;
             std::getline(std::cin, line);
             if (std::cin.eof()) {
@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
             Parser parser(std::move(tokens));
             auto value = parser.parse();
             auto result = env->eval(std::move(value));
-            if (!fileIO >> 1) std::cout << result->toString() << std::endl;
+            if (!(fileIO >> 1)) std::cout << result->toString() << std::endl;
         } catch (std::runtime_error& e) {
             std::cerr << "Error: " << e.what() << std::endl;
         }
