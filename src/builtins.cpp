@@ -37,9 +37,8 @@ std::unordered_map<std::string, ValuePtr> getBuiltins() {
         {"modulo", std::make_shared<BuiltinProcValue>(modulo)},
         {"eq?", std::make_shared<BuiltinProcValue>(eq)},
         {"equal?", std::make_shared<BuiltinProcValue>(equal)},
-        {"eq_sym?", std::make_shared<BuiltinProcValue>(eq)},
         {"not", std::make_shared<BuiltinProcValue>(not_)},
-        {"=", std::make_shared<BuiltinProcValue>(eq)},
+        {"=", std::make_shared<BuiltinProcValue>(eq_sym)},
         {"<", std::make_shared<BuiltinProcValue>(lt)},
         {">", std::make_shared<BuiltinProcValue>(gt)},
         {"<=", std::make_shared<BuiltinProcValue>(lte)},
@@ -98,7 +97,14 @@ ValuePtr newline(BuiltinParams params) {
 ValuePtr display(BuiltinParams params) {
     for (const auto& i : params) {
         if (i->getType() == ValueType::StringValue) {
-            std::cout << i->as<StringValue>()->getValue();
+            auto str = i->as<StringValue>()->getValue();
+            for (auto it = str.begin(); it != str.end(); it++) {
+                if (*it == '\\') {
+                    str.erase(it);  // 删除it处的一个字符
+                    break;
+                }
+            }
+            std::cout << str;
             continue;
         }
         std::cout << i->toString();
@@ -304,6 +310,19 @@ ValuePtr eq(BuiltinParams params) {
         return equal(params);
     }
     return std::make_shared<BooleanValue>(params[0] == params[1]);
+}
+
+ValuePtr eq_sym(BuiltinParams params) {
+    Checker::checkParams(params, 2, 2);
+    if (params[0]->getType() != params[1]->getType()) {
+        return std::make_shared<BooleanValue>(false);
+    }
+    if (Checker::checkTypeInList(
+            {ValueType::NumericValue},
+            params[0]->getType())) {
+        return equal(params);
+    }
+    else {throw LispError(params[0]->toString() + " is not a number.");}
 }
 
 ValuePtr equal(BuiltinParams params) {

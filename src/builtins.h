@@ -1,6 +1,5 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
-// #include <vector>
 #include <algorithm>
 #include <iostream>
 #include <unordered_map>
@@ -79,6 +78,7 @@ ValuePtr quotient(BuiltinParams params);
 ValuePtr remainder_(BuiltinParams params);
 ValuePtr modulo(BuiltinParams params);
 ValuePtr eq(BuiltinParams params);
+ValuePtr eq_sym(BuiltinParams params);
 ValuePtr equal(BuiltinParams params);
 ValuePtr not_(BuiltinParams params);
 ValuePtr lt(BuiltinParams params);

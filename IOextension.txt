@@ -1,0 +1,6 @@
+Usage: mini_lisp.exe
+[ -f <input_filename> |
+  -o <output_filename> ]
+如果指定了"-f"选项，则从<input_filename>读取源代码，否则从标准输入读取源代码。
+如果指定了"-o"选项，则将结果输出到<output_filename>（不会输出>>>提示符），否则输出到标准输出。
+```
